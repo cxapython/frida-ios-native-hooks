@@ -45,7 +45,6 @@ $ frida-trace -m "-[NSURLSession dataTaskWithRequest*]" -U <pid/name>
     log('-[NSURLSession dataTaskWithRequest:' + args[2] + ' completionHandler:' + args[3] + ']');
     log(' --- URL:');
     log(request.URL().toString());
-    log(' --- headers:');
     // log(request.allHTTPHeaderFields().toString());
     var nsDict = request.allHTTPHeaderFields();
 
@@ -58,7 +57,8 @@ $ frida-trace -m "-[NSURLSession dataTaskWithRequest*]" -U <pid/name>
         var value = new ObjC.Object(nsDict.objectForKey_(key));
         jsDict[key] = String(value); // convert everything to a JavaScript String representation
     }
-    console.log('--- headers:',JSON.stringify(jsDict));
+    log('--- headers:');
+    log(JSON.stringify(jsDict))
 
     log(' --- body:');
     if (request.HTTPBody()) log(request.HTTPBody().toString());
