@@ -40,18 +40,31 @@ $ frida-trace -m "-[NSURLSession dataTaskWithRequest*]" -U <pid/name>
 * edit scripts at __handlers__
 
 ```javascript
-onEnter: function (log, args, state) {
+  onEnter: function (log, args, state) {
     var request = new ObjC.Object(args[2]);
     log('-[NSURLSession dataTaskWithRequest:' + args[2] + ' completionHandler:' + args[3] + ']');
     log(' --- URL:');
     log(request.URL().toString());
     log(' --- headers:');
-    log(request.allHTTPHeaderFields().toString());
+    // log(request.allHTTPHeaderFields().toString());
+    var nsDict = request.allHTTPHeaderFields();
+
+    var jsDict = {};
+    var keys = nsDict.allKeys();
+
+    var keyCount = keys.count();
+    for (var i = 0; i < keyCount; i++) {
+        var key = keys.objectAtIndex_(i);
+        var value = new ObjC.Object(nsDict.objectForKey_(key));
+        jsDict[key] = String(value); // convert everything to a JavaScript String representation
+    }
+    console.log('--- headers:',JSON.stringify(jsDict));
+
     log(' --- body:');
     if (request.HTTPBody()) log(request.HTTPBody().toString());
     log(' --- method:');
     log(request.HTTPMethod().toString());
-  }
+  },
 ```
 
 * edit scripts at __handlers__
